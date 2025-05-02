@@ -1,0 +1,78 @@
+name: CD Pipeline for Microservices x y z
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline for microservices x y z"]
+    types:
+      - completed
+
+jobs:
+  debug:
+    name: Debug CD Trigger
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      triggered_branch: ${{ steps.extract.outputs.branch }}
+    steps:
+      - name: Confirm CD was triggered by CI
+        id: extract
+        run: |
+          echo "CD pipeline triggered by workflow run"
+          echo "Triggered workflow name: ${{ github.event.workflow_run.name }}"
+          echo "Workflow conclusion: ${{ github.event.workflow_run.conclusion }}"
+          echo "Triggered branch: ${{ github.event.workflow_run.head_branch }}"
+          echo "branch=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+
+  deploy-test:
+    name: Deploy to Test
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs: debug
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build JARs for deployment
+        run: |
+          mvn package -DskipTests -f services/microservicex/pom.xml
+          mvn package -DskipTests -f services/microservicey/pom.xml
+          mvn package -DskipTests -f services/microservicez/pom.xml
+
+      - name: Deploy to TEST (simulated)
+        run: |
+          echo "Deploying microservicex to TEST..."
+          echo "Deploying microservicey to TEST..."
+          echo "Deploying microservicez to TEST..."
+
+  deploy-preprod:
+    name: Deploy to Pre-Prod
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs: deploy-test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy to PRE-PROD (simulated)
+        run: |
+          echo "Deploying microservicex to PRE-PROD..."
+          echo "Deploying microservicey to PRE-PROD..."
+          echo "Deploying microservicez to PRE-PROD..."
+
+  deploy-prod:
+    name: Deploy to Prod
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs: deploy-preprod
+    environment:
+      name: production
+      url: https://test-need-an-actual-production-environment
+    steps:
+      - name: Manual approval gate
+        run: echo "Waiting for manual approval to deploy to PROD..."
+
+      - name: Deploy to PROD (simulated)
+        run: |
+          echo "Deploying microservicex to PROD..."
+          echo "Deploying microservicey to PROD..."
+          echo "Deploying microservicez to PROD..."
