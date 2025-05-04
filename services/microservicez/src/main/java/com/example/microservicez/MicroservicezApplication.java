@@ -10,6 +10,7 @@ public class MicroservicezApplication {
 		SpringApplication.run(MicroservicezApplication.class, args);
 
 		System.out.println("test z");
+		System.out.println("test z again");
 	}
 
 }
