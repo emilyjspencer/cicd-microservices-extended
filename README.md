@@ -16,3 +16,6 @@ git add services/microservicez/src/main/java/com/example/microservicez/Microserv
 * click on the Actions tab - there should be workflows under it 
 * CI pipeline for microservice x y z
 * CD pipeline for Microservice x y z
+
+Once the CI completes, the CD pipeline will begin.
+Can click on the different stages of the pipeline (represented as rectangles) to view the logs
